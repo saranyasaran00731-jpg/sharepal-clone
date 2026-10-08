@@ -5,8 +5,36 @@ import Sidebar from "./components/Sidebar";
 import Banner from "./components/Banner";
 import ProductCard from "./components/ProductCard";
 import DateModal from "./components/DateModal";
+import CityModal from "./components/CityModal";
 import { categories } from "./data/categories";
 import data from "./data/products.json";
+
+function PromoBanner() {
+  const items = [
+    ["Monthly Earnings", "From rental assets"],
+    ["Upto ₹10,000", "Instant Wallet credits"],
+    ["10% Off", "Exclusive discount when you rent"],
+    ["Get 10% Cashback", "On every order"],
+  ];
+  return (
+    <div className="mt-8 rounded-2xl bg-gradient-to-r from-[#1E2B4F] to-[#2A4A8A] p-6 text-white">
+      <h3 className="font-['Poppins'] text-2xl font-bold md:text-3xl">
+        Become an <span className="text-[#A6E22E]">Asset Partner.</span> Earn Monthly.
+      </h3>
+      <div className="mt-4 grid grid-cols-2 gap-4 md:grid-cols-4">
+        {items.map(([a, b]) => (
+          <div key={a}>
+            <p className="font-['Poppins'] text-lg font-semibold text-[#A6E22E]">{a}</p>
+            <p className="text-xs opacity-80">{b}</p>
+          </div>
+        ))}
+      </div>
+      <button className="mt-5 rounded-full bg-[#C5EE3A] px-6 py-2 font-semibold text-black transition hover:brightness-95">
+        Know More ↗
+      </button>
+    </div>
+  );
+}
 
 export default function App() {
   const [tab, setTab] = useState("Gaming");
@@ -14,6 +42,8 @@ export default function App() {
   const [visible, setVisible] = useState(12);
   const [modal, setModal] = useState(false);
   const [dates, setDates] = useState(null);
+  const [cityOpen, setCityOpen] = useState(false);
+  const [city, setCity] = useState("Bangalore");
 
   const cfg = categories[tab];
   const all = tab === "Gaming" ? data.products : [];
@@ -24,35 +54,54 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#FAF8F0]">
-      <Header onOpenDates={() => setModal(true)} dates={dates} />
-      <CategoryTabs active={tab} onChange={(t) => { setTab(t); setCat("All"); setVisible(12); }} />
-      <div className="mx-auto flex max-w-7xl gap-6 px-6 py-6">
-        <Sidebar items={cfg.side} active={cat} accent={cfg.accent}
-          onSelect={(c) => { setCat(c); setVisible(12); }} />
+      <Header
+        onOpenDates={() => setModal(true)}
+        onOpenCity={() => setCityOpen(true)}
+        city={city}
+        dates={dates}
+      />
+      <CategoryTabs
+        active={tab}
+        onChange={(t) => { setTab(t); setCat("All"); setVisible(12); }}
+      />
+
+      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 md:px-6">
+        <Sidebar
+          items={cfg.side}
+          active={cat}
+          accent={cfg.accent}
+          onSelect={(c) => { setCat(c); setVisible(12); }}
+        />
         <main className="min-w-0 flex-1">
           <Banner cfg={cfg} />
           <div className="mt-6 flex items-end justify-between border-b pb-2">
-            <h1 className="text-2xl font-semibold">{cfg.title}</h1>
+            <h1 className="text-xl font-semibold md:text-2xl">{cfg.title}</h1>
             <span className="text-sm text-gray-400">Total items: {products.length} items</span>
           </div>
 
           {products.length === 0 ? (
             <p className="py-20 text-center text-gray-400">
-              {tab === "Gaming" ? "No items in this category yet." : "🚧 Coming soon! This assignment covers the Gaming page."}
+              🚧 Coming soon! This assignment covers the Gaming page.
             </p>
           ) : (
-            <div className="mt-6 grid grid-cols-2 gap-5 lg:grid-cols-4">
+            <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-4">
               {products.slice(0, visible).map((p) => (
                 <ProductCard key={p.id} p={p} days={dates?.days} />
               ))}
             </div>
           )}
 
+          {products.length > 0 && <PromoBanner />}
+
           {visible < products.length && (
             <div className="mt-8 text-center">
-              <p className="mb-3 text-sm text-gray-400">Showing {visible} of {products.length} results</p>
-              <button onClick={() => setVisible((v) => v + 12)}
-                className="rounded-full border border-gray-700 px-10 py-2 font-medium transition hover:bg-[#1E2B4F] hover:text-white">
+              <p className="mb-3 text-sm text-gray-400">
+                Showing {visible} of {products.length} results
+              </p>
+              <button
+                onClick={() => setVisible((v) => v + 12)}
+                className="rounded-full border border-gray-700 px-10 py-2 font-medium transition hover:bg-[#1E2B4F] hover:text-white"
+              >
                 Show More
               </button>
             </div>
@@ -61,9 +110,13 @@ export default function App() {
       </div>
 
       <DateModal open={modal} onClose={() => setModal(false)} onConfirm={setDates} />
+      <CityModal open={cityOpen} onClose={() => setCityOpen(false)} city={city} onSelect={setCity} />
+
       {!dates && (
-        <button onClick={() => setModal(true)}
-          className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border-2 border-[#8BC53F] bg-[#1E2B4F] px-6 py-3 text-sm font-medium text-white shadow-lg transition hover:scale-105">
+        <button
+          onClick={() => setModal(true)}
+          className="fixed bottom-6 left-1/2 -translate-x-1/2 rounded-full border-2 border-[#8BC53F] bg-[#1E2B4F] px-6 py-3 text-sm font-medium text-white shadow-lg transition hover:scale-105"
+        >
           📅 Select rental dates to view prices
         </button>
       )}
